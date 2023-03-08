@@ -2,18 +2,33 @@
 // import './App.css';
 
 import { useEffect, useState } from 'react';
-import { ethers } from 'ethers';
+import { ethers, toNumber } from 'ethers';
+import {
+  abiCounter,
+  addressCounter
+} from './constant.js';
 
 function App() {
 
   const [provider, setProvider] = useState(null)
   const [defaultAccount, setDefaultAccount] = useState(null);
+  const [count, setCount] = useState(null)
+
+  // read count from contract
+  const getCount = async (contractCounter) => {
+    const c = await contractCounter.get()
+    setCount(toNumber(c))
+  }
 
   useEffect(() => {
     if (typeof window.ethereum !== 'undefined') {
       console.log('MetaMask is installed!');
       console.log(window.ethereum);
-      setProvider(new ethers.BrowserProvider(window.ethereum))
+      const p = new ethers.BrowserProvider(window.ethereum)
+      setProvider(p)
+
+      const contractCounter = new ethers.Contract(addressCounter, abiCounter, p)
+      getCount(contractCounter)
     }
   }, [])
 
@@ -39,7 +54,7 @@ function App() {
       </div>
 
       <div>
-
+        Count: {count}
       </div>
     </div>
   );
